@@ -11,40 +11,44 @@ library(reshape)
 library(ggplot2)
 library(rgdal)
 
-setwd("E:/biomod2_zaipei/")
-DataSpecies1 <- read.csv("specise_data/60_2_rarefied_points.csv")
+setwd("F:/gxiang/AIC")
+DataSpecies1 <- read.csv("specise_data/145_1_rarefied_points.csv")
 head(DataSpecies1)
-myRespName1 <- 'wheat' 
+myRespName1 <- 'Aegilops.tauschii' 
 myResp1 <- as.numeric(DataSpecies1[,myRespName1])
 myRespXY1<- DataSpecies1[,c("X_WGS84","Y_WGS84")]
 
-DataSpecies2 <- read.csv("specise_data/60_rarefied_points.csv")
+DataSpecies2 <- read.csv("specise_data/145_rarefied_points.csv")
 head(DataSpecies2)
-myRespName2 <- 'Dioscorea.alata.L.' 
+myRespName2 <- 'Triticum.aestivum' 
 myResp2 <- as.numeric(DataSpecies2[,myRespName2])
 myRespXY2 <- DataSpecies2[,c("X_WGS84","Y_WGS84")]
 
 
-myExpl = stack( raster( "current/bio2.tif"),
+myExpl = stack( raster( "current/bio1.tif"),
+                raster( "current/bio2.tif"),
                 raster( "current/bio4.tif"),
+                raster( "current/bio5.tif"),
                 raster( "current/bio7.tif"),
                 raster( "current/bio8.tif"),
+               
                 raster( "current/bio10.tif"),
+                raster( "current/bio11.tif"),
                 raster( "current/bio12.tif"),
                 raster( "current/bio15.tif"),
+              
                 raster( "current/bio18.tif"),
                 raster( "current/bio19.tif"))
 
 
-xy.sp1<-subset(myRespXY1)
-xy.sp2<-subset(myRespXY2) 
+xy.sp1<-subset(myRespXY1)#Bromus_erectus
+xy.sp2<-subset(myRespXY2) #Daucus_carota
 
 env.sp1<-extract(myExpl,xy.sp1)
 env.sp2<-extract(myExpl,xy.sp2)
 env.bkg<-na.exclude(values(myExpl))
 #################################### PCA-ENVIRONMENT ##################################
 pca.cal <- dudi.pca(env.bkg, center = TRUE, scale = TRUE, scannf = FALSE, nf = 2)
-
 pca.cal$eig[1:4]
 round(pca.cal$eig/sum(pca.cal$eig)*100,2)[1:2]
 # predict the scores on the axes
@@ -59,8 +63,7 @@ points(scores.sp1)
 plot(z2$z.uncor)
 points(scores.sp2)
 
-
-
+ecospat.shift.centroids(scores.sp1,scores.sp2,env.sp1,env.sp2,col = 'red')
 
 ecospat.niche.overlap(z1,z2 ,cor = TRUE)
 #################################### stability S in space ##################################
@@ -84,5 +87,3 @@ ecospat.niche.dyn.index (z1, z2, intersection=NA)
 ecospat.plot.niche.dyn(z1, z2, quant=0.25, interest=2,
                        title= "Niche Overlap", name.axis1="PC1",
                        name.axis2="PC2")
-
-ecospat.shift.centroids(scores.sp1,scores.sp2,env.sp1,env.sp2,col = "red")
